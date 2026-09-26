@@ -1,6 +1,7 @@
-checkpoints/
+# checkpoints/ are committed via git-LFS for Hugging Face deployment
+plots/
 __pycache__/
 *.pyc
 .DS_Store
 .pneumonia/
-.ipynb_checkpoints/ 
+.ipynb_checkpoints/

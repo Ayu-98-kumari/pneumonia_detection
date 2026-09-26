@@ -1,6 +1,6 @@
 student_model: "deeper"
 teacher_checkpoint: "checkpoints/pneumonia_resnet18.pth"
-data_dir: "../chest_xray/chest_xray"
+data_dir: "data"
 batch_size: 32
 lr: 0.001
 num_epochs: 5

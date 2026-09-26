@@ -57,12 +57,12 @@ MODEL_ORDER = ["DeeperCNN", "ResNet-18", "Distilled CNN"]
 CSS = f"""
 <style>
     .stApp {{ background: {BG}; }}
-    .block-container {{ padding-top: 2.2rem; max-width: 1250px; }}
+    .block-container {{ padding-top: 2.2rem; max-width: 1500px; }}
     /* hide the Deploy button in the top-right toolbar */
     [data-testid="stAppDeployButton"] {{ display: none !important; }}
     .stDeployButton {{ display: none !important; }}
-    section[data-testid="stSidebar"] {{ background: {CARD}; min-width: 370px; max-width: 370px; }}
-    section[data-testid="stSidebar"] > div {{ width: 370px; }}
+    section[data-testid="stSidebar"] {{ background: {CARD}; min-width: 300px; max-width: 300px; }}
+    section[data-testid="stSidebar"] > div {{ width: 300px; }}
 
     /* "Controls" — the biggest thing in the sidebar */
     section[data-testid="stSidebar"] h3 {{
@@ -95,7 +95,7 @@ CSS = f"""
     h1, h2, h3, h4, p, label, span, div {{ color: {TEXT}; }}
 
     .app-title {{
-        font-size: 2.8rem; font-weight: 700; color: {TEXT};
+        font-size: 3.2rem; font-weight: 700; color: {TEXT};
         margin: 0 0 0.15rem 0; letter-spacing: -0.01em;
     }}
     .app-sub {{ font-size: 1.0rem; color: {TEXT_SOFT}; margin: 0 0 1.4rem 0; }}
@@ -552,9 +552,59 @@ def _fig_confidence(labels, probs, current_thr):
     return fig
 
 
+def _fig_confusion(labels, probs, current_thr):
+    """2x2 confusion matrix recomputed at the current threshold.
+    Diagonal (correct) tinted sage, off-diagonal (errors) tinted clay."""
+    preds = (probs >= current_thr).astype(int)
+    tn, fp, fn, tp = confusion_matrix(labels, preds, labels=[0, 1]).ravel()
+    total = max(int(tn + fp + fn + tp), 1)
+
+    fig, ax = plt.subplots(figsize=(7.4, 3.8))   # match the other two charts
+    fig.patch.set_facecolor(CARD)
+    ax.set_facecolor(CARD)
+
+    # (row, col): row 0 = True NORMAL (top), row 1 = True PNEUMONIA (bottom)
+    #             col 0 = Pred NORMAL (left), col 1 = Pred PNEUMONIA (right)
+    cells = {
+        (0, 0): (tn, "True Negatives",  True),
+        (0, 1): (fp, "False Positives", False),
+        (1, 0): (fn, "False Negatives", False),
+        (1, 1): (tp, "True Positives",  True),
+    }
+    for (r, c), (val, lab, ok) in cells.items():
+        x, y = c, 1 - r                       # flip so True NORMAL sits on top
+        face = CORRECT if ok else WRONG
+        ax.add_patch(plt.Rectangle((x, y), 1, 1, facecolor=face, alpha=0.22,
+                                   edgecolor=CARD, linewidth=4))
+        ax.text(x + 0.5, y + 0.60, f"{int(val)}", ha="center", va="center",
+                fontsize=23, fontweight="bold", color=TEXT)
+        ax.text(x + 0.5, y + 0.31, lab, ha="center", va="center",
+                fontsize=8.5, color=TEXT_SOFT)
+        ax.text(x + 0.5, y + 0.15, f"{val / total * 100:.1f}%", ha="center",
+                va="center", fontsize=8, color=TEXT_SOFT)
+
+    ax.set_xlim(0, 2)
+    ax.set_ylim(0, 2)
+    ax.set_xticks([0.5, 1.5])
+    ax.set_yticks([0.5, 1.5])
+    ax.set_xticklabels(["NORMAL", "PNEUMONIA"], color=TEXT, fontsize=9)
+    ax.set_yticklabels(["PNEUMONIA", "NORMAL"], color=TEXT, fontsize=9)
+    ax.set_xlabel("Predicted", color=TEXT, fontsize=9.5, fontweight="bold")
+    ax.set_ylabel("True label", color=TEXT, fontsize=9.5, fontweight="bold")
+    ax.xaxis.set_label_position("top")
+    ax.xaxis.tick_top()
+    ax.tick_params(length=0)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    # no set_aspect("equal") — cells fill the 7.4x3.8 frame so this chart
+    # renders the same size as the threshold and confidence charts.
+    fig.tight_layout()
+    return fig
+
+
 def render_charts_row(labels, probs, threshold):
-    """Two analysis charts side by side, in one row."""
-    c1, c2 = st.columns(2)
+    """Three analysis charts side by side, in one row."""
+    c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown('<div class="fulltitle">Threshold explorer</div>',
                     unsafe_allow_html=True)
@@ -573,6 +623,15 @@ def render_charts_row(labels, probs, threshold):
         st.caption("Predicted pneumonia probability per true class. Clear separation "
                    "means confident predictions; overlap near the threshold is where "
                    "mistakes happen.")
+    with c3:
+        st.markdown('<div class="fulltitle">Confusion matrix</div>',
+                    unsafe_allow_html=True)
+        fig = _fig_confusion(labels, probs, threshold)
+        st.pyplot(fig, use_container_width=True)
+        plt.close(fig)
+        st.caption("Actual counts at the current threshold. Green = correct, "
+                   "clay = errors. False Negatives are missed pneumonia — the "
+                   "costly mistake. Moving the threshold updates every cell.")
 
 
 # ── app ───────────────────────────────────────────────────────────────────────

@@ -1,10 +1,25 @@
+---
+title: Pneumonia Detection
+emoji: 🫁
+colorFrom: green
+colorTo: gray
+sdk: streamlit
+sdk_version: "1.64.0"
+app_file: app.py
+pinned: false
+---
+
+<!-- The block above configures the Hugging Face Space. Keep it at the very top. -->
+
 # Pneumonia Detection from Chest X-Rays
 
 Binary classification of chest X-ray images into **NORMAL** and **PNEUMONIA** using PyTorch CNNs and transfer learning.
 
 ## Dataset
 
-Uses the [Chest X-Ray Images (Pneumonia)](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia) dataset. Place the extracted data so the directory looks like:
+Uses the [Chest X-Ray Images (Pneumonia)](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia) dataset by Kermany, Zhang & Goldbaum (2018), published on [Mendeley Data](https://data.mendeley.com/datasets/rscbjbr9sj) and licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The **test split** (624 images) is bundled in this repo under `data/test/` so the demo app runs without external downloads.
+
+For full training you also need the `train/` and `val/` splits. Place the extracted data so the directory looks like:
 
 ```
 Pneumonia_project/

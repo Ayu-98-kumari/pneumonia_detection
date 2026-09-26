@@ -1,5 +1,11 @@
+# CPU-only PyTorch wheels (smaller image, no CUDA) for Hugging Face Spaces
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+streamlit
 torch
 torchvision
 scikit-learn
 numpy
 pyyaml
+matplotlib
+pillow
