@@ -1,7 +1,8 @@
-# Hugging Face Space (Docker SDK) running the Streamlit demo.
+# Container image for the Streamlit pneumonia-detection demo.
+# (Optional — the app also deploys directly on Streamlit Community Cloud.)
 FROM python:3.11-slim
 
-# HF Spaces run containers as a non-root user (uid 1000).
+# Run as a non-root user.
 RUN useradd -m -u 1000 user
 USER user
 ENV HOME=/home/user \
@@ -16,7 +17,7 @@ WORKDIR /app
 COPY --chown=user requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
-# App code, models (LFS), bundled test data, and .streamlit/ theme.
+# App code, model checkpoints, bundled test data, and .streamlit/ theme.
 COPY --chown=user . .
 
 EXPOSE 8501

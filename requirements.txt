@@ -1,4 +1,4 @@
-# CPU-only PyTorch wheels (smaller image, no CUDA) for Hugging Face Spaces
+# CPU-only PyTorch wheels (smaller install, no CUDA)
 --extra-index-url https://download.pytorch.org/whl/cpu
 
 streamlit

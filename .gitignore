@@ -1,4 +1,4 @@
-# checkpoints/ are committed via git-LFS for Hugging Face deployment
+# checkpoints/ are committed to the repo (the deployed app loads them)
 plots/
 __pycache__/
 *.pyc
