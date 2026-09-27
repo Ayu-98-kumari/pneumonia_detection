@@ -760,7 +760,7 @@ def main():
                        "(~7–10px upsampled) — an approximate view, not a clinical map.")
             wrong = _batch_misclassified(batch, ((model_name, thr),))
             options = [_img_option(i, p, l, i in wrong) for i, (p, l) in enumerate(batch)]
-            sel = st.radio("Choose an X-ray", options, key="gc_single")
+            sel = st.selectbox("Choose an X-ray", options, key="gc_single")
             gp, gl = batch[options.index(sel)]
             render_gradcam_single(entry, gp, gl, thr, device)
 
@@ -785,7 +785,7 @@ def main():
                        "distilled student focuses where the ResNet-18 teacher does.")
             wrong = _batch_misclassified(batch, tuple((n, thresholds[n]) for n in MODEL_ORDER))
             options = [_img_option(i, p, l, i in wrong) for i, (p, l) in enumerate(batch)]
-            sel = st.radio("Choose an X-ray", options, key="gc_compare")
+            sel = st.selectbox("Choose an X-ray", options, key="gc_compare")
             gp, gl = batch[options.index(sel)]
             render_gradcam_compare(entries, gp, gl, thresholds, device)
 
