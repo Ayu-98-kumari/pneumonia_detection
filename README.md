@@ -1,15 +1,3 @@
----
-title: Pneumonia Detection
-emoji: 🫁
-colorFrom: green
-colorTo: gray
-sdk: docker
-app_port: 8501
-pinned: false
----
-
-<!-- The block above configures the Hugging Face Space. Keep it at the very top. -->
-
 # Pneumonia Detection from Chest X-Rays
 
 Binary classification of chest X-ray images into **NORMAL** and **PNEUMONIA** using PyTorch CNNs and transfer learning.
