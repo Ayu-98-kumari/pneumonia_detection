@@ -673,9 +673,9 @@ def main():
 
     sb.markdown(SEP, unsafe_allow_html=True)
 
-    show_analysis = sb.checkbox("Show analysis", value=True)
+    show_analysis = sb.checkbox("Show analysis", value=False)
     sb.caption("Full test-set metrics and charts above the predictions "
-               "(scores all 624 images — a few seconds first time, then cached).")
+               "(scores all 624 images — takes a moment the first time, then cached).")
 
     sb.markdown(SEP, unsafe_allow_html=True)
 
