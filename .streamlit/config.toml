@@ -1,3 +1,4 @@
+# "Calm Clinic" theme for the Streamlit app (colors match app.py).
 [theme]
 primaryColor = "#5B9AA0"
 backgroundColor = "#EAE2D0"
