@@ -163,6 +163,10 @@ CSS = f"""
     td.cmok  {{ color: {CORRECT}; font-weight: 700; }}
     td.cmbad {{ color: {WRONG};   font-weight: 700; }}
     table.cmptable td.mname {{ color: {ACCENT}; font-weight: 700; text-align: left; }}
+
+    /* Grad-CAM picker: recolor Streamlit's markdown red (:red[✗]) to the app's
+       soft wrong-prediction crimson, so the misclassified mark matches the cards. */
+    span[style*="rgb(255, 43, 43)"] {{ color: {WRONG} !important; }}
 </style>
 """
 
@@ -432,8 +436,8 @@ def _cam_overlay(gray_img, cam, size=224, alpha=0.45):
 
 def _img_option(i, path, label, wrong=False):
     tag = CLASS_NAMES[label] if label is not None else "Uploaded"
-    cross = "❌ " if wrong else ""
-    return f"{cross}{i+1}. {tag} — {Path(path).name}"
+    cross = "  :red[✗]" if wrong else ""
+    return f"{i+1}. {tag} — {Path(path).name}{cross}"
 
 
 @st.cache_data(show_spinner=False)
