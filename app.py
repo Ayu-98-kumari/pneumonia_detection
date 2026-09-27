@@ -430,9 +430,32 @@ def _cam_overlay(gray_img, cam, size=224, alpha=0.45):
     return Image.fromarray((over * 255).astype(np.uint8))
 
 
-def _img_option(i, path, label):
+def _img_option(i, path, label, wrong=False):
     tag = CLASS_NAMES[label] if label is not None else "Uploaded"
-    return f"{i+1}. {tag} — {Path(path).name}"
+    cross = "❌ " if wrong else ""
+    return f"{cross}{i+1}. {tag} — {Path(path).name}"
+
+
+@st.cache_data(show_spinner=False)
+def _batch_misclassified(batch, items):
+    """Indices in `batch` that any of the given (model, threshold) pairs get wrong.
+
+    Test-set images only (Uploaded images have no true label). Runs over the small
+    on-screen batch, so it needs no full test-set scoring.
+    """
+    entries, device = load_models()
+    wrong = set()
+    for i, (path, true_label) in enumerate(batch):
+        if true_label is None:
+            continue
+        rgb = Image.open(path).convert("RGB")
+        for name, thr in items:
+            entry = entries[name]
+            prob = _predict(entry["model"], entry["transform"], rgb, device)
+            if (1 if prob >= thr else 0) != true_label:
+                wrong.add(i)
+                break
+    return wrong
 
 
 def render_gradcam_single(entry, path, true_label, thr, device):
@@ -735,7 +758,8 @@ def main():
                         unsafe_allow_html=True)
             st.caption("Warmer = stronger influence on the prediction. Coarse focus "
                        "(~7–10px upsampled) — an approximate view, not a clinical map.")
-            options = [_img_option(i, p, l) for i, (p, l) in enumerate(batch)]
+            wrong = _batch_misclassified(batch, ((model_name, thr),))
+            options = [_img_option(i, p, l, i in wrong) for i, (p, l) in enumerate(batch)]
             sel = st.selectbox("Choose an X-ray", options, key="gc_single")
             gp, gl = batch[options.index(sel)]
             render_gradcam_single(entry, gp, gl, thr, device)
@@ -759,7 +783,8 @@ def main():
                         unsafe_allow_html=True)
             st.caption("The same X-ray through each model. Compare whether the compact "
                        "distilled student focuses where the ResNet-18 teacher does.")
-            options = [_img_option(i, p, l) for i, (p, l) in enumerate(batch)]
+            wrong = _batch_misclassified(batch, tuple((n, thresholds[n]) for n in MODEL_ORDER))
+            options = [_img_option(i, p, l, i in wrong) for i, (p, l) in enumerate(batch)]
             sel = st.selectbox("Choose an X-ray", options, key="gc_compare")
             gp, gl = batch[options.index(sel)]
             render_gradcam_compare(entries, gp, gl, thresholds, device)
