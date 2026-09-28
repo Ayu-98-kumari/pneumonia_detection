@@ -123,6 +123,12 @@ CSS = f"""
     .card.correct img {{ border-color: {CORRECT}; }}
     .card.wrong   img {{ border-color: {WRONG}; }}
 
+    /* batch index badge — matches the number in the Grad-CAM dropdown */
+    .cardidx {{
+        display: inline-block; font-size: 0.78rem; font-weight: 700;
+        color: {CARD}; background: {ACCENT}; border-radius: 6px;
+        padding: 0.08rem 0.5rem; margin: 0.45rem 0 0.05rem 0;
+    }}
     .truth {{ font-size: 0.8rem; color: {TEXT_SOFT}; margin: 0.5rem 0 0.15rem 0; }}
     .verdict {{ font-size: 1.02rem; font-weight: 700; margin: 0.1rem 0; }}
     .verdict.correct {{ color: {CORRECT}; }}
@@ -138,6 +144,8 @@ CSS = f"""
     }}
     .ccard img {{ width: 100%; border-radius: 9px; display: block; border: 3px solid {NEUTRAL}; }}
     .ccard .truth {{ text-align: center; }}
+    .ccard {{ text-align: center; }}
+    .ccard .mrow {{ text-align: left; }}
     .mrow {{
         display: flex; justify-content: space-between; align-items: baseline;
         padding: 0.32rem 0.1rem; border-top: 1px solid #EEF2F3;
@@ -231,7 +239,7 @@ def render_single(entry, batch, device, threshold):
     cards = []
     correct = total = pneu_total = pneu_hit = 0
 
-    for path, true_label in batch:
+    for i, (path, true_label) in enumerate(batch):
         rgb = Image.open(path).convert("RGB")
         prob = _predict(entry["model"], entry["transform"], rgb, device)
         pred = 1 if prob >= threshold else 0
@@ -247,6 +255,7 @@ def render_single(entry, batch, device, threshold):
         cards.append(
             f'<div class="card {vc}">'
             f'<img src="data:image/png;base64,{b64}"/>'
+            f'<div class="cardidx">{i+1}</div>'
             f'{truth_html}'
             f'<div class="verdict {vc}">{mark} {CLASS_NAMES[pred]}</div>'
             f'<div class="conf">confidence {prob*100:.1f}%</div>'
@@ -276,7 +285,7 @@ def render_single(entry, batch, device, threshold):
 
 def render_compare(entries, batch, device, thresholds):
     cards = []
-    for path, true_label in batch:
+    for i, (path, true_label) in enumerate(batch):
         rgb = Image.open(path).convert("RGB")
         b64 = img_to_base64(Image.open(path))
 
@@ -299,6 +308,7 @@ def render_compare(entries, batch, device, thresholds):
         cards.append(
             f'<div class="ccard">'
             f'<img src="data:image/png;base64,{b64}"/>'
+            f'<div class="cardidx">{i+1}</div>'
             f'{truth_html}'
             f'{"".join(rows)}'
             f'</div>'
